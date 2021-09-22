@@ -8,13 +8,13 @@ output: html_document
 
 
 ```{r}
-# load libraries
+
 library(dplyr)
 library(ggplot2)
 
 
 
-
+```
 
 
 1.Use R to demonstrate that the mean minimizes the sum of the squared deviations from the mean. Accomplish the following steps:
@@ -136,5 +136,6 @@ summarize(mean_healthy = mean(Healthy.life.expectancy.at.birth, na.rm = TRUE),
            sd_healthy = sd(Healthy.life.expectancy.at.birth, na.rm = TRUE))              
 
 ```
+
 
 
