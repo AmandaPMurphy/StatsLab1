@@ -1,0 +1,93 @@
+---
+title: "Lab 8"
+author: "Amanda Murphy"
+date: "11/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+x <- 1
+u <- 0
+sigma <- 1
+
+1/(sigma*sqrt(2*pi)) * exp(1)^(-.5*((x-u/sigma)^2))
+
+dnorm(1,0,1)
+
+```
+
+
+1. Write a function to convert a vector of raw-scores into z-scores. The function should have inputs for the vector, the mean and sd of the normal distribution, and should return a vector of zscores. (1 point).
+
+
+
+```{r}
+to_zscores <- function(raw,mu,sd){
+  zscores <- return((raw-mu)/sd)
+  return(zscores)
+}
+
+some_numbers<- c(2,5,6,7,8)
+
+to_zscores(some_numbers,5,1)
+
+to_zscores_b <- function(raw,mu=NULL,sdev=NULL){
+  if(is.null(mu) == TRUE) mu <- mean(raw)
+  if(is.null(sdev) == TRUE) sdev <- sd(raw)
+  zscores <- (raw-mu)/sdev
+  return(zscores)
+  
+}
+
+ to_zscores_b(some_numbers,mu =5, sdev=1)
+  
+  to_zscores_b(some_numbers)
+  
+
+```
+
+-- Also, demonstrate that the function works correctly (1 point). How you make the demonstration is up to you.
+
+-- Advanced: Have an option so that the function will convert the raw scores to zscores in one of two ways:
+using user provided mean and standard deviation
+using the calculated mean and standard deviation from the raw scores
+
+
+
+2. Base R does not have a function for a z-test. Write a function to accomplish a one-sample z-test. Remember, a one-sample z test is used to compare the probability of obtaining the sample mean (or larger or smaller) if it came from a known normal distribution. (2 points).
+
+
+
+```{r}
+z.test <- function(sample_mean,sample_size,mu,sigma){
+  smpl_dist_mean <- mu
+  smpl_dist_sd <- sigma/sqrt(sample_size)
+  
+  p_value <- pnorm(sample_mean,smpl_dist_mean,smpl_dist_sd, lower.tail = FALSE)
+  return(p_value)
+  
+}
+
+z.test(sample_mean=50, 
+       sample_size = 25,
+       mu = 40,
+       sigma = 7)
+
+
+z.test(1,1,0,1)
+
+z.test(25,100,18,4)
+
+
+```
+
+
+-- Use your z-test function to conduct a test of the following. A sample of 25 scores is taken. The mean of the sample is 50. The sample is assumed to have been taken from a normal distribution with mean 40 and standard deviation 7. Report a one-tailed z-test, examining the probability of obtaining a sample of greater than 50 in this situation. Report the results, and give a brief sentence explaining the result and the inference you make (2 points).
+
+
+### With a sample mean of 50 compared to the population mu being 40 with a standard deviation of 7, the pvalue is very small, meaning that it would be rare or a very small probability percentage that your sample results would give you a mean of 50. ** This example kind of confused me bc I would think if sigma was 7 then one standard deviation away from the mean would be 47 and that is only three less than the sample mean we found. I guess maybe I am thinking in terms of our own sample standard deviation, rather than the standard error.
