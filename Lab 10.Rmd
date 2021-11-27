@@ -1,0 +1,234 @@
+---
+title: "Lab 10"
+author: "Amanda Murphy"
+date: "11/26/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+?t.test
+
+?rnorm
+
+
+```
+#one-sample t-test
+
+```{r}
+some_random_means <- rnorm(100,10,1)
+t.test(some_random_means, mu=10)
+```
+#paired sample t-test
+
+```{r}
+A_means <- rnorm(10,0,1)
+B_means <- rnorm(10,0,1)
+
+t.test(A_means,B_means, paired = TRUE)
+```
+
+#Independent T-test
+
+```{r}
+t.test(A_means, B_means, var.equal = TRUE)
+```
+
+```{r}
+(my_results <- t.test(A_means,B_means, var.equal = TRUE))
+```
+
+```{r}
+my_results$statistic
+my_results$parameter
+my_results$p.value
+my_results$method
+
+```
+
+```{r}
+library(papaja)
+apa_print(my_results)
+```
+
+#printing statistic in apa format to manuscript
+```{r}
+apa_print(my_results)$statistic
+```
+
+```{r}
+#measurements per subject
+N <- 10
+X <- 2
+
+
+#distribution assumptions
+A_mean <- 100
+B_mean <- 100
+
+A_sd <- 25
+B_sd <- 25
+```
+
+```{r}
+A_scores <- rnorm(N*X, A_mean, A_sd)
+B_scores <- rnorm(N*X, B_mean, B_sd)
+
+sim_data <- data.frame(groups = rep(c("A","B"), each = N*X),
+                       subjects = rep(rep(1:N,each = X),2),
+                       scores = c(A_scores,B_scores))
+
+library(dplyr)
+
+subject_means <- sim_data %>%
+  group_by(groups,subjects) %>%
+  summarize(means = mean(scores), .groups = 'drop')
+
+t.test(means~groups, var.equal = TRUE, data = subject_means)
+
+```
+
+```{r}
+t.test(replicate(N, mean(rnorm(X, A_mean, A_sd))),
+       replicate(N, mean(rnorm(X, B_mean, B_sd))),
+       var.equal = TRUE)
+```
+
+```{r}
+sim_mean_diffs <- replicate(1000, mean(replicate(N, mean(rnorm(X, A_mean, A_sd)))) - mean(replicate(N, mean(rnorm(X, B_mean, B_sd)))))
+
+hist(sim_mean_diffs)
+```
+```{r}
+hist(rt(1000,df=18))
+```
+
+```{r}
+sim_ps <- replicate(1000, t.test(replicate(10, mean(rnorm(10, 5, 2))),
+                                 replicate(10, mean(rnorm(10, 5, 2))),
+                                 var.equal = TRUE)$p.value)
+hist(sim_ps)
+```
+```{r}
+
+library(ggplot2)
+
+effect_sizes <- seq(0,1.5,.1)
+prop_significant <-c()
+
+for(i in 1:length(effect_sizes)){
+  sim_ps <- replicate(1000, t.test(replicate(10, mean(rnorm(5, 0, 1))),
+                                   replicate(10, mean(rnorm(5, effect_sizes[i], 1))),
+                                   var.equal = TRUE)$p.value)
+  
+  prop_significant[i] <- length(sim_ps[sim_ps < .05])/1000
+}
+
+plot_df <- data.frame(effect_sizes,
+                      prop_significant)
+
+ggplot(plot_df, aes(x=effect_sizes,y=prop_significant))+
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=seq(0,1.5,.1))+
+  scale_y_continuous(breaks=seq(0,1,.1)) +
+  ylab("Proportion Significant")
+```
+## Generalization Problems
+
+
+```{r}
+library(papaja)
+
+library(dplyr)
+library(ggplot2)
+
+all_data <- read.csv("open_data/stroop_stand.csv")
+
+(stand_stroop <- t.test(all_data$incongruent_stand,
+                        all_data$congruent_stand,
+                        paired = TRUE))
+
+(sit_stroop <- t.test(all_data$incongruent_sit,
+                      all_data$congruent_sit,
+                      paired = TRUE))
+
+                      
+
+```
+
+```{r}
+ papaja::apa_print(sit_stroop)$full_result
+ papaja::apa_print(stand_stroop)$full_result
+```
+
+```{r}
+stand_stroop_scores <- all_data$incongruent_stand-all_data$congruent_stand
+sit_stroop_scores <- all_data$incongruent_sit-all_data$congruent_sit
+
+stroop_differences <- sit_stroop_scores - stand_stroop_scores
+
+paired_results <- t.test(stand_stroop_scores, sit_stroop_scores,
+                         paired= TRUE)
+
+(interaction_results <- t.test(stroop_differences))
+```
+
+
+```{r}
+library(tidyr)
+
+stroop_df <- all_data %>%
+  pivot_longer(cols =1:4,
+               names_to = c("Congruency","Posture"),
+               names_sep = "_",
+               values_to = "RTs")
+
+overall_means <- stroop_df %>%
+  group_by(Posture,Congruency) %>%
+  summarise(meanRT = mean(RTs),
+            SEMRT = (sd(RTs)/sqrt(length(RTs))))
+
+ggplot(overall_means, aes(x=Posture,
+                           y=meanRT,
+                           group=Congruency,
+                           fill=Congruency))+
+         geom_bar(stat="identity",position="dodge")+
+         theme_classic(base_size=12)+
+         ylab("Mean Reaction Time (ms)")+
+         geom_errorbar(aes(ymin=meanRT-SEMRT,
+                           ymax=meanRT+SEMRT),
+                       position=position_dodge(width=0.9),
+                       width=.2,
+                       color="black")+
+         coord_cartesian(ylim=c(500,1000))
+                       
+```
+
+
+```{r}
+effect_sizes <- seq(0,1.5,.1)
+prop_significant <-c()
+
+for(i in 1:length(effect_sizes)){
+  sim_ps <- replicate(1000,t.test(replicate(50,rnorm(1,effect_sizes[i],1)), mu = 0)$p.value)
+  
+  prop_significant[i] <- length(sim_ps[sim_ps < .05])/1000
+}
+
+plot_df <- data.frame(effect_sizes,
+                      prop_significant)
+
+ggplot(plot_df, aes(x=effect_sizes,y=prop_significant))+
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=seq(0,1.5,.1))+
+  scale_y_continuous(breaks=seq(0,1.5,.1))
+                                                      
+                                               
+
+```
+
