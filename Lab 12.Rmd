@@ -1,0 +1,21 @@
+---
+title: "Lab 12"
+author: "Amanda Murphy"
+date: "12/6/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+1.Should you do a linear regression on this data? Explain.
+
+```{r}
+Y <- c(10,9,8,7,6,5,4,3,2,1,2,3,4,5,6,7,8,9,10)
+X <- c(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19)
+
+plot(X,Y)
+
+#No I would not do a 'linear regression' on this set of variables because when the data is plotted on a graph it shows that it is not a linear shape between the x and y variables. Where the data clearly does show some sort of relationship, with a perfect negative correlation in the first set of data points and then a perfect positive correlation when the x variable reaches 10. I would either do two seperate linear regressions, or trial and error with a V shape regression.
+```
+
