@@ -1,0 +1,191 @@
+---
+title             : "Replication analysis of experiment 1, Coordinating bodies and mind. Behavioral synchrony fosters mentalizing"
+shorttitle        : "Title"
+
+author: 
+  - name          : "Amanda Murphy"
+    affiliation   : "1"
+    corresponding : yes    # Define only one corresponding author
+    address       : "2900 Bedford Ave"
+    email         : "apmbodywork@gmail.com"
+    role:         # Contributorship roles (e.g., CRediT, https://casrai.org/credit/)
+      - Conceptualization
+      - Writing - Original Draft Preparation
+      - Writing - Review & Editing
+  - name          : "Adam Baimel"
+    affiliation   : "1,2"
+    role:
+      - Writing - Review & Editing
+
+affiliation:
+  - id            : "1"
+    institution   : "Brooklyn College CUNY"
+  - id            : "2"
+    institution   : "The University of British Columbia"
+
+
+
+
+abstract: |
+  The study was condutcted by : Baimel, Birch, S. A. ., & Norenzayan, A. 2018. The original paper can be retrieved from https://doi.org/10.1016/j.jesp.2017.10.008) 
+  
+  The practice of collective rituals using synchronized group movements has been around for centuries. Anthropologists have referenced group practices as being a major component in relating the self to others, as well as fostering social cohesion and cooperation.
+  
+  'Attentional focus on others' while in a collective practice  questions if there is a simultaneous perception of others' actions and if this may involve the same neural pathways in the perceiver when being in sync with others. Further, the bridge between others and self in physical movements has been thought to influence a greater perspective taking of the other and therefore a higher ability in empaphizing.
+  
+  The study of comparing in-time synchronized movements with others in comparison to the same movements at different times than the group has is a main focus for researchers in experiment 1 of this study. This condition, asynchronous and synchronous body movements was compared with the likeliness of taking the perspective of others in the form of an empathy quotient questionnaire.
+  
+ 
+  
+  In experiment one, synchronous movements as opposed to asynchronous movements, increased self reported results in the tendency and ability for considering other's mental states as shown by results in the empathy quotient.
+  
+  
+  
+  <!-- https://tinyurl.com/ybremelq -->
+  
+keywords          : "Interpersonal coordination,Mentalizing,Perspective taking,Mind, perception"
+wordcount         : "X"
+
+bibliography      : ["r-references.bib","papercitation.bib"]
+
+floatsintext      : yes
+figurelist        : no
+tablelist         : no
+footnotelist      : no
+linenumbers       : yes
+mask              : no
+draft             : no
+
+documentclass     : "apa6"
+classoption       : "man"
+output            : papaja::apa6_pdf
+---
+
+```{r setup, include = FALSE}
+library("papaja")
+r_refs("r-references.bib")
+```
+
+```{r analysis-preferences}
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+
+
+# Methods
+ The self report 'Empathy Quotient' was used to measure if individuals in general considered other's mental states. The dependent variable was measured by a synchronized participation task. More specifically, whether or not individuals were assigned to move synchronously or asynchronously to a musical performance task. Data for experiment 1 used in this replication can be found at:
+ https://osf.io/5d4f6/
+
+## Participants
+N= 116
+
+## Procedure
+
+## Data analysis
+We used `r cite_r("r-references.bib")` for all our analyses.
+
+```{r}
+library(data.table)
+library(readr)
+library(dplyr)
+library(ggplot2)
+experiment_1 <- fread("experiment1.csv")
+
+experiment_1$condition <- as.factor(experiment_1$condition)
+levels(experiment_1$condition) <- c("async","sync")
+
+Empathy_quotient <- experiment_1$eqtot
+
+
+dependent_variable <-     mean(Empathy_quotient)
+
+st_dev <- sd(Empathy_quotient)
+
+SE <- sd(Empathy_quotient)/sqrt(length(Empathy_quotient))
+
+
+
+overall_means <-  experiment_1 %>%
+  group_by(condition) %>%
+  summarize(means = mean(eqtot))
+
+
+
+condition_empathy <- t.test(Empathy_quotient~condition, data = experiment_1, var.equal = TRUE)
+
+apa_print(condition_empathy)
+
+```
+
+
+# Results
+
+The reanalysis for the async and sync conditions for the empathy quotient were significant in showing that those who performed synchronous movements as part of the experiment rated higher in taking others perspectives in to consideration as measured by the empathy quotient. `r apa_print(condition_empathy)` 
+
+
+```{r,,fig.cap= "Means of empathy quotient scores in Sync and Async groups. "}
+# print table of means
+knitr::kable(overall_means)
+```
+
+
+```{r,,fig.cap= "Means of empathy quotient scores in Sync and Async groups. "}
+
+means_empathyqt <- experiment_1 %>%
+  group_by(condition) %>%
+  summarize(means = mean(eqtot))
+
+
+ggplot(means_empathyqt, aes(x=condition, y=means)) +
+  geom_bar(stat="identity")
+
+```
+
+
+
+\newpage
+
+
+#Power Analysis
+
+The following reports a power analysis for the t-test used in experiment 1.This shows the power of this design to detect the effect size at different sample sizes.
+
+```{r,fig.cap= "A power curve analysis for an independent t-test with 116 participants."}
+
+
+effect_sizes <- seq(0,1.5,.1)
+prop_significant <-c()
+
+for(i in 1:length(effect_sizes)){
+  sim_ps <- replicate(116, t.test(replicate(10, mean(rnorm(5, 0, 1))),
+                                   replicate(10, mean(rnorm(5, effect_sizes[i], 1))),
+                                   var.equal = TRUE)$p.value)
+  
+  prop_significant[i] <- length(sim_ps[sim_ps < .05])/116
+}
+
+plot_df <- data.frame(effect_sizes,
+                      prop_significant)
+
+ggplot(plot_df, aes(x=effect_sizes,y=prop_significant))+
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks=seq(.1,2,.1))+
+  scale_y_continuous(breaks=seq(0,1,.1)) +
+  ylab("Proportion Significant")
+
+```
+
+# Discussion
+The re-analysis successfully reproduced the analysis reported by @baimel2018coordinating.
+
+# References
+
+\begingroup
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+
+<div id="refs" custom-style="Bibliography"></div>
+\endgroup

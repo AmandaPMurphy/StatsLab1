@@ -1,0 +1,99 @@
+---
+title: "Untitled"
+author: "Amanda Murphy"
+date: "12/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#The study from 2018, Coordinating bodies and minds: Behavioral synchrony fosters mentalizing, assessed the relationship between synchornized movements of the body with others and likeliness of considering other's thoughts and mental states as a form of empathy. The idea was that following movements synchronously with other people also encourages people to become cognitively engaged in reasoning with others' mental states. 
+
+#In experiment one, synchronous movements as opposed to asynchronous movements, increased self reported results in the tendency and ability for considering other's mental states. The self report 'Empathy Quotient' was used to measure if individuals in general considered other's mental states. The dependent variable was measured by a synchronized participation task. More specifically, whether or not individuals were assigned to move synchronously or asynchronously to a musical performance task.
+
+#Citation:
+#  Baimel, Birch, S. A. ., & Norenzayan, A. (2018). Coordinating    bodies and minds: Behavioral synchrony fosters mentalizing. Journal of Experimental Social Psychology, 74, 281–290. https://doi.org/10.1016/j.jesp.2017.10.008
+
+#Data from Experiment 1
+# https://osf.io/5d4f6/
+
+```{r}
+library(data.table)
+experiment_1 <- fread("experiment1.csv")
+
+```
+
+
+```{r}
+library(data.table)
+
+
+
+#async or sync
+#async = 0, sync = 1
+experiment_1$condition
+```
+
+
+```{r}
+experiment_1$condition <- as.factor(experiment_1$condition)
+levels(experiment_1$condition) <- c("async","sync")
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+#mean for DV: Empathy Quotient 
+
+Empathy_quotient <- experiment_1$eqtot
+
+
+dependent_variable <-     mean(Empathy_quotient)
+
+st_dev <- sd(Empathy_quotient)
+
+SE <- sd(Empathy_quotient)/sqrt(length(Empathy_quotient))
+
+
+```
+
+#independent T-test replication
+
+```{r}
+condition_empathy <- t.test(Empathy_quotient~condition, data = experiment_1, var.equal = TRUE)
+```
+
+#table of means
+
+```{r}
+means_empathyqt <- experiment_1 %>%
+  group_by(condition) %>%
+  summarize(means = mean(eqtot))
+
+# print table of means
+knitr::kable(means_empathyqt)
+            
+```
+
+
+#graph table of means
+
+```{r}
+ggplot(means_empathyqt, aes(x=condition, y=means)) +
+  geom_bar(stat="identity")
+```
+#from original paper:
+###Empathy Quotient scores were higher in the synchronous condition (M = 46.00, SD = 9.86) than in the asynchronous condition (M = 42.21, SD = 10.45); t(113.26) = − 2.01, p = .047, d = 0.37, .95CI = [0.00, 0.74].
+
+
+#In the replicated analysis of the data from Experiment 1, I found a slightly different t variable from the independent t test calculation. I found t = -1.9999, df = 114, p-value = 0.04789, which was slightly different then the reported t(113.26) = − 2.01, p = .047. I for some reason have a different degrees of freedom than in the paper's report, which may account for the slight difference in t value and pvalue reported. 
+
+#Mean groups between the two conditions: 'sync and async' for the empathy quotient were reported from the orginal paper as : (M = 46.00, SD = 9.86) than in the asynchronous condition (M = 42.21, SD = 10.45). This was congruent with what I found  for the mean in group async = 42.20968 and mean in the sync group = 46. 
+
+#I believe I was somewhat successful in reproducing these results, although am now wondering if my standard error for this experiment was calculated correctly. Also, I am not sure with the difference of degree's of freedom used.
+
+
+                   
